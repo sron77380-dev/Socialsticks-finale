@@ -1,0 +1,1343 @@
+import { useState, useEffect } from "react";
+
+// ============================================================
+// DONNÉES — 100% IMMOBILIER
+// ============================================================
+
+const DEMO_COMPANY = {
+  name: "Réseau Proprio Sud-Ouest",
+  logo: "RP",
+  color: "#C8A96E",
+  plan: "Réseau",
+  seats: 80,
+  used: 67,
+  agences: 12,
+  region: "Nouvelle-Aquitaine",
+};
+
+const DEMO_TEAM = [
+  {
+    id: 1,
+    name: "Sophie Martin",
+    title: "Agent Senior",
+    email: "s.martin@proprio.fr",
+    phone: "+33 6 12 34 56 78",
+    avatar: "SM",
+    photo: "https://randomuser.me/api/portraits/women/44.jpg",
+    active: true,
+    views: 312,
+    taps: 89,
+    leads: 23,
+    mandats: 4,
+    agence: "Bordeaux Centre",
+  },
+  {
+    id: 2,
+    name: "Thomas Durand",
+    title: "Négociateur",
+    email: "t.durand@proprio.fr",
+    phone: "+33 6 98 76 54 32",
+    avatar: "TD",
+    photo: "https://randomuser.me/api/portraits/men/32.jpg",
+    active: true,
+    views: 198,
+    taps: 54,
+    leads: 12,
+    mandats: 2,
+    agence: "Mérignac",
+  },
+  {
+    id: 3,
+    name: "Camille Rousseau",
+    title: "Directrice d'Agence",
+    email: "c.rousseau@proprio.fr",
+    phone: "+33 6 11 22 33 44",
+    avatar: "CR",
+    photo: "https://randomuser.me/api/portraits/women/68.jpg",
+    active: true,
+    views: 445,
+    taps: 132,
+    leads: 47,
+    mandats: 8,
+    agence: "Bordeaux Centre",
+  },
+  {
+    id: 4,
+    name: "Marc Lefebvre",
+    title: "Conseiller Immobilier",
+    email: "m.lefebvre@proprio.fr",
+    phone: "+33 6 55 66 77 88",
+    avatar: "ML",
+    photo: "https://randomuser.me/api/portraits/men/75.jpg",
+    active: false,
+    views: 76,
+    taps: 21,
+    leads: 5,
+    mandats: 1,
+    agence: "Pessac",
+  },
+  {
+    id: 5,
+    name: "Julie Petit",
+    title: "Conseillère Immobilier",
+    email: "j.petit@proprio.fr",
+    phone: "+33 6 44 55 66 77",
+    avatar: "JP",
+    photo: "https://randomuser.me/api/portraits/women/50.jpg",
+    active: true,
+    views: 143,
+    taps: 38,
+    leads: 9,
+    mandats: 2,
+    agence: "Mérignac",
+  },
+  {
+    id: 6,
+    name: "Pierre Moreau",
+    title: "Agent Senior",
+    email: "p.moreau@proprio.fr",
+    phone: "+33 6 33 44 55 66",
+    avatar: "PM",
+    photo: "https://randomuser.me/api/portraits/men/22.jpg",
+    active: true,
+    views: 201,
+    taps: 67,
+    leads: 18,
+    mandats: 3,
+    agence: "Arcachon",
+  },
+  {
+    id: 7,
+    name: "Isabelle Lambert",
+    title: "Conseillère",
+    email: "i.lambert@proprio.fr",
+    phone: "+33 6 22 33 44 55",
+    avatar: "IL",
+    photo: "https://randomuser.me/api/portraits/women/17.jpg",
+    active: false,
+    views: 45,
+    taps: 12,
+    leads: 3,
+    mandats: 0,
+    agence: "Pessac",
+  },
+];
+
+const PLANS = [
+  {
+    name: "Starter",
+    price: "45€",
+    period: "/mois/agent",
+    perSeat: "Jusqu'à 3 agents",
+    seats: "Carte NFC incluse",
+    features: [
+      "Carte NFC premium",
+      "Profil avancé + biens en exclusivité",
+      "Scans illimités",
+      "Analytics basiques",
+      "Support prioritaire",
+    ],
+    cta: "Commencer",
+    highlight: false,
+  },
+  {
+    name: "Équipe",
+    price: "65€",
+    period: "/mois/agent",
+    perSeat: "4 à 10 agents",
+    seats: "Dashboard manager inclus",
+    features: [
+      "Tout Starter",
+      "Dashboard manager unifié",
+      "Intégration CRM immobilier (Apimo, Perizia)",
+      "Onboarding dédié",
+      "Analytics avancées",
+    ],
+    cta: "Essai 30 jours gratuit",
+    highlight: true,
+  },
+  {
+    name: "Réseau",
+    price: "80€",
+    period: "/mois/agent",
+    perSeat: "10 à 100 agences",
+    seats: "White-label + SSO",
+    features: [
+      "Tout Équipe",
+      "White-label marque réseau",
+      "SSO / Active Directory",
+      "Admin centralisé multi-agences",
+      "CSM dédié",
+      "Formation sur site",
+    ],
+    cta: "Contacter les ventes",
+    highlight: false,
+  },
+];
+
+const AGENCES = [
+  { name: "Bordeaux Centre", agents: 18, actifs: 16, leads: 89, mandats: 14 },
+  { name: "Mérignac", agents: 12, actifs: 10, leads: 47, mandats: 8 },
+  { name: "Pessac", agents: 9, actifs: 6, leads: 21, mandats: 3 },
+  { name: "Arcachon", agents: 14, actifs: 13, leads: 62, mandats: 11 },
+  { name: "Libourne", agents: 7, actifs: 7, leads: 31, mandats: 5 },
+];
+
+const NFC_CARDS = [
+  { type: "Standard", desc: "PVC Premium, finition mate", price: "12€", min: "10 min", icon: "💳", highlight: false },
+  { type: "Premium Metal", desc: "Métal brossé, gravure laser", price: "28€", min: "5 min", icon: "✨", highlight: true },
+  { type: "Bambou", desc: "Éco-responsable, gravure laser", price: "22€", min: "5 min", icon: "🪵", highlight: false },
+];
+
+const PROPERTIES = [
+  { type: "Appartement T3", lieu: "Bordeaux Chartrons - 85m²", price: "450 000€", dpe: "C", statut: "Exclusivité", image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400" },
+  { type: "Maison 5 pièces", lieu: "Mérignac - 130m²", price: "385 000€", dpe: "D", statut: "Sous compromis", image: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400" },
+  { type: "Studio", lieu: "Bordeaux Centre - 28m²", price: "185 000€", dpe: "B", statut: "Disponible", image: "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=400" },
+  { type: "Appartement T4", lieu: "Pessac - 92m²", price: "295 000€", dpe: "E", statut: "Exclusivité", image: "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=400" },
+  { type: "Maison T5", lieu: "Arcachon - 110m²", price: "550 000€", dpe: "F", statut: "Exclusivité", image: "https://images.unsplash.com/photo-1560185008-b033106af5c3?w=400" },
+  { type: "Appartement T2", lieu: "Bordeaux Centre - 45m²", price: "210 000€", dpe: "G", statut: "Disponible", image: "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=400" },
+];
+
+// ============================================================
+// STYLES GLOBAUX
+// ============================================================
+
+const GLOBAL_STYLES = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap');
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --gold: #C8A96E;
+  --dark: #0F0F0F;
+  --cream: #F7F5F2;
+  --muted: rgba(15,15,15,0.45);
+  --border: rgba(15,15,15,0.1);
+  --serif: 'Cormorant Garamond', serif;
+  --sans: 'Outfit', sans-serif;
+}
+html { font-size: 16px; }
+body { background: var(--cream); -webkit-tap-highlight-color: transparent; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes slideUp {
+  from { transform:translateY(100%); opacity:0; }
+  to   { transform:translateY(0); opacity:1; }
+}
+@keyframes scanPulse {
+  0% { box-shadow: 0 0 0 0 rgba(200,169,110,0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(200,169,110,0); }
+  100% { box-shadow: 0 0 0 0 rgba(200,169,110,0); }
+}
+@keyframes dpeFlash {
+  0% { background-color: rgba(200,169,110,0.2); }
+  50% { background-color: rgba(200,169,110,0.6); }
+  100% { background-color: rgba(200,169,110,0.2); }
+}
+.fu  { animation: fadeUp 0.6s ease forwards; }
+.fu1 { animation-delay:0.05s; opacity:0; }
+.fu2 { animation-delay:0.15s; opacity:0; }
+.fu3 { animation-delay:0.25s; opacity:0; }
+.fu4 { animation-delay:0.35s; opacity:0; }
+
+.btn-gold {
+  background: var(--gold); color: var(--dark);
+  padding: 16px 28px; border: none; border-radius: 4px;
+  font-family: var(--sans); font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  -webkit-tap-highlight-color: transparent; min-height: 52px;
+}
+.btn-gold:active { transform: scale(0.97); filter: brightness(0.95); }
+.btn-dark {
+  background: var(--dark); color: #fff;
+  padding: 16px 28px; border: none; border-radius: 4px;
+  font-family: var(--sans); font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  -webkit-tap-highlight-color: transparent; min-height: 52px;
+}
+.btn-dark:active { transform: scale(0.97); }
+.btn-outline {
+  background: transparent; color: var(--dark);
+  padding: 15px 28px; border: 1.5px solid var(--border); border-radius: 4px;
+  font-family: var(--sans); font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  -webkit-tap-highlight-color: transparent; min-height: 52px;
+}
+.btn-outline:active { background: rgba(15,15,15,0.05); }
+.input {
+  width: 100%; background: #fff;
+  border: 1.5px solid var(--border); color: var(--dark);
+  padding: 14px 16px; border-radius: 6px;
+  font-size: 16px; font-family: var(--sans); outline: none;
+  transition: border-color 0.2s; -webkit-appearance: none;
+}
+.input:focus { border-color: var(--gold); }
+.input::placeholder { color: rgba(15,15,15,0.3); }
+.tag {
+  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--gold);
+}
+.toggle {
+  width: 48px; height: 26px; border-radius: 100px;
+  cursor: pointer; border: none; position: relative;
+  transition: background 0.28s; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.toggle-dot {
+  width: 20px; height: 20px; background: #fff;
+  border-radius: 50%; position: absolute; top: 3px;
+  transition: left 0.28s; box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+.badge {
+  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  padding: 4px 10px; border-radius: 100px; letter-spacing: 0.3px;
+}
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: #fff; border-top: 1px solid var(--border);
+  display: flex; z-index: 200;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 10px 4px 8px; cursor: pointer; transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent; border: none; background: none;
+}
+.nav-item.active .nav-icon { color: var(--dark); }
+.nav-item.active .nav-label { color: var(--dark); font-weight: 600; }
+.nav-icon { font-size: 22px; margin-bottom: 3px; }
+.nav-label { font-family: var(--sans); font-size: 10px; color: var(--muted); letter-spacing: 0.3px; }
+.card-white { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.member-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 14px; }
+.pub-link {
+  width: 100%; padding: 16px 20px; border-radius: 8px;
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--sans); font-size: 16px;
+  cursor: pointer; text-decoration: none; transition: all 0.18s;
+  border: none; -webkit-tap-highlight-color: transparent;
+}
+.pub-link:active { transform: scale(0.98); }
+.scan-animation { animation: scanPulse 1.5s infinite; }
+.dpe-flash { animation: dpeFlash 1s ease; }
+::-webkit-scrollbar { width: 0px; }
+`;
+
+// ============================================================
+// COMPOSANTS COMMUNS
+// ============================================================
+
+function Avatar({ text, color, size = 44, photo }) {
+  if (photo) {
+    return (
+      <img
+        src={photo}
+        alt={text}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          objectFit: "cover",
+          flexShrink: 0,
+        }}
+      />
+    );
+  }
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: "50%", flexShrink: 0,
+      background: `linear-gradient(135deg, ${color}, ${color}88)`,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontSize: size * 0.3, fontWeight: "700", color: "#0A0A0A"
+    }}>
+      {text}
+    </div>
+  );
+}
+
+function Toggle({ active, onToggle }) {
+  return (
+    <button className="toggle" onClick={onToggle} style={{ background: active ? "var(--gold)" : "rgba(15,15,15,0.15)" }}>
+      <div className="toggle-dot" style={{ left: active ? "25px" : "3px" }} />
+    </button>
+  );
+}
+
+function DPEBadge({ dpe }) {
+  const colors = {
+    A: "#00c000", B: "#50c000", C: "#a0c000",
+    D: "#ffc000", E: "#ff8000", F: "#ff4000", G: "#c00000"
+  };
+  const alerts = { F: "Interdit 2028", G: "Interdit 2025" };
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+      <span style={{
+        background: colors[dpe] || "#999",
+        color: "#fff",
+        padding: "3px 8px",
+        borderRadius: "4px",
+        fontSize: "11px",
+        fontWeight: "700"
+      }}>
+        DPE {dpe}
+      </span>
+      {alerts[dpe] && (
+        <span style={{
+          fontSize: "9px",
+          background: dpe === "G" ? "rgba(192,0,0,0.15)" : "rgba(255,64,0,0.15)",
+          color: dpe === "G" ? "#c00000" : "#ff4000",
+          padding: "2px 6px",
+          borderRadius: "10px",
+          fontWeight: "600"
+        }}>
+          ⚠ {alerts[dpe]}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function StatutBadge({ statut }) {
+  const styles = {
+    "Exclusivité": { bg: "rgba(200,169,110,0.15)", color: "var(--gold)" },
+    "Disponible":  { bg: "rgba(22,163,74,0.1)", color: "#16a34a" },
+    "Sous compromis": { bg: "rgba(239,68,68,0.1)", color: "#dc2626" },
+  };
+  const s = styles[statut] || { bg: "rgba(0,0,0,0.05)", color: "var(--muted)" };
+  return <span className="badge" style={{ background: s.bg, color: s.color }}>{statut}</span>;
+}
+
+function Navbar({ setView }) {
+  return (
+    <nav style={{
+      display: "flex", justifyContent: "space-between", alignItems: "center",
+      padding: "0 20px", height: "60px",
+      background: "rgba(247,245,242,0.95)", backdropFilter: "blur(12px)",
+      borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: 100
+    }}>
+      <div style={{ fontFamily: "var(--serif)", fontSize: "20px", fontWeight: "700" }}>
+        Social<span style={{ color: "var(--gold)" }}>sticks</span>
+      </div>
+      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+        <button className="btn-outline" style={{ padding: "10px 16px", fontSize: "13px", minHeight: "40px" }} onClick={() => setView("manager")}>Connexion</button>
+        <button className="btn-gold" style={{ padding: "10px 16px", fontSize: "13px", minHeight: "40px" }} onClick={() => setView("pricing")}>Démo gratuite</button>
+      </div>
+    </nav>
+  );
+}
+
+function BottomNav({ tab, setTab }) {
+  const items = [
+    { id: "team",     icon: "👥", label: "Agents" },
+    { id: "agences",  icon: "🏢", label: "Agences" },
+    { id: "nfc",      icon: "📲", label: "Cartes NFC" },
+    { id: "settings", icon: "⚙️", label: "Paramètres" },
+  ];
+  return (
+    <div className="bottom-nav">
+      {items.map(item => (
+        <button key={item.id} className={`nav-item ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)}>
+          <div className="nav-icon">{item.icon}</div>
+          <div className="nav-label">{item.label}</div>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Footer() {
+  return (
+    <footer style={{ padding: "24px 20px", borderTop: "1px solid var(--border)", textAlign: "center" }}>
+      <div style={{ fontFamily: "var(--serif)", fontSize: "18px", fontWeight: "700", marginBottom: "4px" }}>
+        Social<span style={{ color: "var(--gold)" }}>sticks</span>
+      </div>
+      <div style={{ fontSize: "12px", color: "var(--muted)" }}>La carte NFC dédiée à l'immobilier · © 2025</div>
+    </footer>
+  );
+}
+
+function ROICalculator({ team, totalLeads }) {
+  const avgLeadValue = 1500;
+  const monthlyCost = team.length * 65;
+  const annualCost = monthlyCost * 12;
+  const estimatedRevenue = totalLeads * avgLeadValue;
+  const roi = (estimatedRevenue / annualCost).toFixed(1);
+
+  return (
+    <div className="card-white" style={{ background: "linear-gradient(135deg, #fff, #faf8f5)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+        <div>
+          <div style={{ fontSize: "11px", color: "var(--muted)", letterSpacing: "1px", marginBottom: "4px" }}>VOTRE ROI SOCIALSTICKS</div>
+          <div style={{ fontFamily: "var(--serif)", fontSize: "28px", fontWeight: "700", color: "var(--gold)" }}>×{roi}</div>
+        </div>
+        <div style={{ fontSize: "40px", opacity: 0.2 }}>📊</div>
+      </div>
+      <div style={{ fontSize: "12px", color: "var(--muted)", lineHeight: "1.6" }}>
+        <strong>{totalLeads} leads</strong> générés · Valeur estimée {estimatedRevenue.toLocaleString()}€ <br />
+        vs {annualCost.toLocaleString()}€ d'abonnement
+      </div>
+      <div style={{ marginTop: "10px", height: "4px", background: "rgba(15,15,15,0.08)", borderRadius: "2px" }}>
+        <div style={{ height: "4px", width: `${Math.min(100, roi * 20)}%`, background: "var(--gold)", borderRadius: "2px" }} />
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// LANDING PAGE
+// ============================================================
+
+function Hero({ setView }) {
+  return (
+    <section style={{ padding: "52px 20px 48px", textAlign: "center" }}>
+      <div className="tag fu fu1">Carte NFC · Agents Immobiliers · B2B</div>
+      <h1 className="fu fu2" style={{ fontFamily: "var(--serif)", fontSize: "clamp(38px, 10vw, 62px)", fontWeight: "700", lineHeight: "1.1", margin: "16px 0 20px" }}>
+        Chaque contact<br />devient un<br />
+        <span style={{ color: "var(--gold)" }}>mandat potentiel.</span>
+      </h1>
+      <p className="fu fu3" style={{ fontSize: "16px", lineHeight: "1.7", color: "var(--muted)", maxWidth: "340px", margin: "0 auto 32px" }}>
+        Équipez tous vos agents avec une carte NFC connectée. Profils à jour, biens en exclusivité, leads qualifiés — tout en temps réel.
+      </p>
+      <div className="fu fu4" style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "320px", margin: "0 auto" }}>
+        <button className="btn-gold" style={{ width: "100%" }} onClick={() => setView("pricing")}>Demander une démo →</button>
+        <button className="btn-outline" style={{ width: "100%" }} onClick={() => setView("manager")}>Voir le dashboard</button>
+      </div>
+    </section>
+  );
+}
+
+function Stats() {
+  const stats = [
+    ["80 000", "Agents en France"],
+    ["+40%", "Leads générés"],
+    ["48h", "Déploiement"],
+  ];
+  return (
+    <section style={{ padding: "0 20px 48px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+        {stats.map(([value, label]) => (
+          <div key={label} style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: "12px", padding: "16px 10px", textAlign: "center" }}>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "20px", fontWeight: "700" }}>{value}</div>
+            <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "4px", lineHeight: "1.3" }}>{label}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function HowItWorks() {
+  const steps = [
+    ["01", "Vous configurez votre réseau", "Logo, couleurs, profils agents et biens en exclusivité depuis votre dashboard."],
+    ["02", "On expédie les cartes", "Cartes NFC livrées en 48h, pré-configurées par agent avec votre charte."],
+    ["03", "Vos agents génèrent des leads", "Un tap smartphone = un profil complet + un formulaire qualifié dans votre CRM."],
+  ];
+  return (
+    <section style={{ padding: "0 20px 56px" }}>
+      <div className="tag" style={{ marginBottom: "14px" }}>Comment ça marche</div>
+      <h2 style={{ fontFamily: "var(--serif)", fontSize: "32px", fontWeight: "700", marginBottom: "24px" }}>Déployé en 48h</h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+        {steps.map(([num, title, desc]) => (
+          <div key={num} className="card-white" style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "34px", fontWeight: "700", color: "rgba(15,15,15,0.08)", lineHeight: 1, flexShrink: 0, minWidth: "42px" }}>{num}</div>
+            <div>
+              <div style={{ fontFamily: "var(--serif)", fontSize: "19px", fontWeight: "600", marginBottom: "6px" }}>{title}</div>
+              <div style={{ fontSize: "14px", color: "var(--muted)", lineHeight: "1.6" }}>{desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function UseCases() {
+  const cases = [
+    { icon: "🚪", title: "Portes ouvertes", desc: "Chaque visiteur repart avec votre profil complet. Fini les cartes papier oubliées au fond d'une poche." },
+    { icon: "🤝", title: "Salons immobiliers", desc: "MIPIM, RENT, SIMI — transformez chaque échange en lead qualifié directement dans votre CRM." },
+    { icon: "📋", title: "Prise de mandats", desc: "Impressionnez vos prospects vendeurs avec une technologie qui reflète votre professionnalisme." },
+    { icon: "🏘️", title: "Réseaux multi-agences", desc: "Dashboard centralisé, branding unifié, analytics en temps réel pour tous vos directeurs d'agence." },
+  ];
+  return (
+    <section style={{ background: "#fff", padding: "48px 20px", borderTop: "1px solid var(--border)" }}>
+      <div className="tag" style={{ marginBottom: "12px" }}>Cas d'usage</div>
+      <h2 style={{ fontFamily: "var(--serif)", fontSize: "30px", fontWeight: "700", marginBottom: "22px" }}>Fait pour le terrain</h2>
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {cases.map((c, i) => (
+          <div key={i} className="card-white" style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
+            <span style={{ fontSize: "24px", flexShrink: 0 }}>{c.icon}</span>
+            <div>
+              <div style={{ fontFamily: "var(--serif)", fontSize: "18px", fontWeight: "600", marginBottom: "4px" }}>{c.title}</div>
+              <div style={{ fontSize: "13px", color: "var(--muted)", lineHeight: "1.6" }}>{c.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DPESection() {
+  return (
+    <section style={{ padding: "48px 20px" }}>
+      <div className="tag" style={{ marginBottom: "12px" }}>Réglementation</div>
+      <h2 style={{ fontFamily: "var(--serif)", fontSize: "30px", fontWeight: "700", marginBottom: "14px", lineHeight: "1.2" }}>
+        DPE, ALUR, loi Climat — toujours à jour.
+      </h2>
+      <p style={{ fontSize: "15px", lineHeight: "1.75", color: "var(--muted)", marginBottom: "20px" }}>
+        Vos agents mettent à jour leurs biens en temps réel. DPE, diagnostics, informations réglementaires — vos prospects ont toujours l'information correcte, sans litige.
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {[
+          ["2025", "Interdiction totale location classe G", "#c00000", "URGENT"],
+          ["2028", "Interdiction location classe F", "#ff4000", "À ANTICIPER"],
+          ["2034", "Interdiction location classe E", "#16a34a", "PLANIFIER"],
+        ].map(([year, label, color, tag]) => (
+          <div key={year} style={{ background: "#fff", border: "1px solid var(--border)", borderLeft: `3px solid ${color}`, borderRadius: "8px", padding: "14px 16px", display: "flex", gap: "14px", alignItems: "center" }}>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "22px", fontWeight: "700", color, flexShrink: 0 }}>{year}</div>
+            <div style={{ fontSize: "13px", color: "var(--muted)", flex: 1 }}>{label}</div>
+            <span className="badge" style={{ background: `${color}20`, color }}>{tag}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: "16px", background: "rgba(200,169,110,0.08)", border: "1px solid rgba(200,169,110,0.25)", borderRadius: "10px", padding: "14px 16px" }}>
+        <p style={{ fontSize: "13px", lineHeight: "1.65" }}>
+          💡 <strong>Avec Socialsticks</strong>, un agent met à jour son profil en 30 secondes. DPE modifié, bien vendu, nouvelle exclusivité — tout est reflété instantanément sur sa carte.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function ROISection() {
+  return (
+    <section style={{ background: "#fff", padding: "48px 20px", borderTop: "1px solid var(--border)" }}>
+      <div className="tag" style={{ marginBottom: "12px" }}>Retour sur investissement</div>
+      <h2 style={{ fontFamily: "var(--serif)", fontSize: "30px", fontWeight: "700", marginBottom: "18px", lineHeight: "1.2" }}>
+        1 mandat = 2 ans d'abonnement.
+      </h2>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "16px" }}>
+        {[
+          { label: "Coût cartes papier / an", value: "1 600€", sub: "20 agents · 4 000 cartes", bad: true },
+          { label: "Socialsticks / an",        value: "10 800€",   sub: "20 agents · 45€/mois",    bad: false },
+          { label: "Leads supplémentaires",    value: "+40%",   sub: "Moyenne constatée",        bad: false },
+          { label: "ROI moyen",                value: "×4.2",   sub: "En 6 mois",               bad: false },
+        ].map((c, i) => (
+          <div key={i} style={{ background: "var(--cream)", border: "1px solid var(--border)", borderLeft: `3px solid ${c.bad ? "rgba(200,60,60,0.35)" : "var(--gold)"}`, borderRadius: "8px", padding: "16px" }}>
+            <div style={{ fontSize: "11px", color: "var(--muted)", marginBottom: "6px", lineHeight: "1.4" }}>{c.label}</div>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "24px", fontWeight: "700", color: c.bad ? "rgba(200,60,60,0.65)" : "var(--dark)" }}>{c.value}</div>
+            <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "4px" }}>{c.sub}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CTASection({ setView }) {
+  return (
+    <section style={{ background: "var(--dark)", padding: "56px 20px", textAlign: "center" }}>
+      <div className="tag" style={{ color: "var(--gold)", marginBottom: "14px" }}>Prêt à équiper votre réseau ?</div>
+      <h2 style={{ fontFamily: "var(--serif)", fontSize: "36px", fontWeight: "700", color: "#fff", marginBottom: "12px", lineHeight: "1.15" }}>
+        Déployez en 48h.<br />Sans engagement.
+      </h2>
+      <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "15px", marginBottom: "32px" }}>
+        Programme pilote gratuit 3 mois pour les premières agences.
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "320px", margin: "0 auto" }}>
+        <button className="btn-gold" style={{ width: "100%", fontSize: "16px" }} onClick={() => setView("pricing")}>Voir les offres →</button>
+        <button onClick={() => setView("manager")} style={{ background: "rgba(255,255,255,0.08)", color: "#fff", padding: "16px", border: "1.5px solid rgba(255,255,255,0.15)", borderRadius: "4px", fontFamily: "var(--sans)", fontSize: "15px", cursor: "pointer", width: "100%" }}>
+          Voir le dashboard
+        </button>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================
+// PRICING
+// ============================================================
+
+function PricingCard({ plan, setView }) {
+  return (
+    <div style={{
+      background: plan.highlight ? "var(--dark)" : "#fff",
+      border: plan.highlight ? "2px solid var(--gold)" : "1px solid var(--border)",
+      borderRadius: "14px", padding: "24px",
+      color: plan.highlight ? "#fff" : "var(--dark)",
+      position: "relative"
+    }}>
+      {plan.highlight && (
+        <div style={{ position: "absolute", top: "-12px", left: "20px", background: "var(--gold)", color: "var(--dark)", fontSize: "10px", fontWeight: "700", letterSpacing: "1.5px", padding: "4px 14px", borderRadius: "100px" }}>RECOMMANDÉ</div>
+      )}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px" }}>
+        <div style={{ fontSize: "12px", letterSpacing: "1.5px", opacity: "0.5", fontWeight: "600" }}>{plan.name.toUpperCase()}</div>
+        <div style={{ fontSize: "11px", color: "var(--gold)", fontWeight: "500", textAlign: "right", maxWidth: "130px" }}>{plan.seats}</div>
+      </div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "4px" }}>
+        <div style={{ fontFamily: "var(--serif)", fontSize: "38px", fontWeight: "700", lineHeight: 1 }}>{plan.price}</div>
+        <div style={{ fontSize: "13px", opacity: "0.45" }}>{plan.period}</div>
+      </div>
+      <div style={{ fontSize: "12px", color: plan.highlight ? "rgba(200,169,110,0.9)" : "var(--gold)", fontWeight: "500", marginBottom: "18px" }}>{plan.perSeat}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" }}>
+        {plan.features.map((f, j) => (
+          <div key={j} style={{ fontSize: "13px", display: "flex", gap: "10px", opacity: "0.8" }}>
+            <span style={{ color: "var(--gold)", flexShrink: 0 }}>✓</span>{f}
+          </div>
+        ))}
+      </div>
+      <button onClick={() => setView("manager")} style={{
+        width: "100%", padding: "15px",
+        background: plan.highlight ? "var(--gold)" : "var(--dark)",
+        color: plan.highlight ? "var(--dark)" : "#fff",
+        border: "none", borderRadius: "6px", cursor: "pointer",
+        fontFamily: "var(--sans)", fontSize: "14px", fontWeight: "600", minHeight: "52px"
+      }}>{plan.cta}</button>
+    </div>
+  );
+}
+
+function PricingFAQ() {
+  const faqs = [
+    ["Les cartes NFC sont-elles incluses ?", "Oui. Chaque offre inclut les cartes physiques. Réapprovisionnement à prix coûtant en cas de départ d'un agent."],
+    ["Que se passe-t-il si un agent quitte l'agence ?", "Vous désactivez sa carte en 10 secondes depuis le dashboard. Le turnover dans l'immobilier (~30%/an) ne ralentit plus votre organisation."],
+    ["Peut-on intégrer notre CRM immobilier ?", "Oui. Socialsticks s'intègre avec les principaux CRM immobiliers (Apimo, Perizia…). Chaque tap NFC génère un lead qualifié directement dans votre pipeline."],
+  ];
+  return (
+    <div className="card-white" style={{ marginTop: "24px" }}>
+      <div style={{ fontFamily: "var(--serif)", fontSize: "20px", fontWeight: "600", marginBottom: "16px" }}>Questions fréquentes</div>
+      {faqs.map(([q, a], i, arr) => (
+        <div key={q} style={{ paddingBottom: "14px", marginBottom: i < arr.length - 1 ? "14px" : 0, borderBottom: i < arr.length - 1 ? "1px solid var(--border)" : "none" }}>
+          <div style={{ fontSize: "14px", fontWeight: "600", marginBottom: "6px" }}>{q}</div>
+          <div style={{ fontSize: "13px", color: "var(--muted)", lineHeight: "1.6" }}>{a}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ============================================================
+// DASHBOARD — ONGLET AGENTS
+// ============================================================
+
+function MemberCard({ member, companyColor, onToggle, onSelect, onDelete }) {
+  const [showMenu, setShowMenu] = useState(false);
+  return (
+    <div className="member-card" style={{ position: "relative" }}>
+      <Avatar text={member.avatar} color={companyColor} size={46} photo={member.photo} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: "15px", fontWeight: "500", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {member.name}
+          {!member.active && (
+            <span style={{ marginLeft: "8px", fontSize: "10px", color: "var(--muted)", background: "rgba(15,15,15,0.05)", padding: "2px 6px", borderRadius: "4px" }}>Inactif</span>
+          )}
+        </div>
+        <div style={{ fontSize: "12px", color: "var(--muted)" }}>{member.title} · {member.agence}</div>
+        <div style={{ display: "flex", gap: "12px", marginTop: "5px", flexWrap: "wrap" }}>
+          <span style={{ fontSize: "11px", color: "var(--muted)" }}>👁 {member.views}</span>
+          <span style={{ fontSize: "11px", color: "var(--muted)" }}>📲 {member.taps} taps</span>
+          <span style={{ fontSize: "11px", color: "var(--gold)", fontWeight: "600" }}>🎯 {member.leads} leads</span>
+          <span style={{ fontSize: "11px", color: "var(--dark)", fontWeight: "600" }}>📋 {member.mandats} mandats</span>
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-end" }}>
+        <Toggle active={member.active} onToggle={() => onToggle(member.id)} />
+        <div style={{ display: "flex", gap: "4px" }}>
+          <button onClick={() => onSelect(member)} style={{ background: "none", border: "1px solid var(--border)", borderRadius: "4px", fontSize: "11px", padding: "4px 8px", cursor: "pointer", fontFamily: "var(--sans)", color: "var(--dark)" }}>Profil</button>
+          <button onClick={() => setShowMenu(!showMenu)} style={{ background: "none", border: "1px solid var(--border)", borderRadius: "4px", fontSize: "11px", padding: "4px 8px", cursor: "pointer" }}>⋯</button>
+        </div>
+        {showMenu && (
+          <div style={{ position: "absolute", top: "50px", right: "16px", background: "#fff", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 10, minWidth: "165px" }}>
+            <button onClick={() => { onSelect(member); setShowMenu(false); }} style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 12px", background: "none", border: "none", cursor: "pointer", fontSize: "13px" }}>👤 Voir le profil agent</button>
+            <button onClick={() => { alert(`Carte NFC commandée pour ${member.name}`); setShowMenu(false); }} style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 12px", background: "none", border: "none", cursor: "pointer", fontSize: "13px" }}>📦 Commander une carte</button>
+            <button onClick={() => { if (window.confirm(`Retirer ${member.name} de l'équipe ?`)) { onDelete(member.id); } setShowMenu(false); }} style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 12px", background: "none", border: "none", cursor: "pointer", fontSize: "13px", color: "#dc2626" }}>🗑️ Retirer de l'équipe</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TeamTab({ team, activeCount, companyColor, onToggle, onAdd, onSelect, onDelete }) {
+  const [showForm, setShowForm] = useState(false);
+  const [newMember, setNewMember] = useState({ name: "", title: "", agence: "", email: "", phone: "", photo: "" });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterActive, setFilterActive] = useState("all");
+
+  const totalLeads = team.reduce((a, m) => a + m.leads, 0);
+  const totalMandats = team.reduce((a, m) => a + m.mandats, 0);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (newMember.name) {
+      onAdd(newMember);
+      setNewMember({ name: "", title: "", agence: "", email: "", phone: "", photo: "" });
+      setShowForm(false);
+    }
+  };
+
+  const filteredTeam = team.filter(m => {
+    const matchSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                       m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                       (m.agence || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchFilter = filterActive === "all" ? true : filterActive === "active" ? m.active : !m.active;
+    return matchSearch && matchFilter;
+  });
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <div>
+          <h2 style={{ fontFamily: "var(--serif)", fontSize: "24px", fontWeight: "700" }}>Mes agents</h2>
+          <p style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>{activeCount} actifs · {team.length} total</p>
+        </div>
+        <button className="btn-gold" style={{ padding: "12px 16px", fontSize: "13px", minHeight: "44px" }} onClick={() => setShowForm(!showForm)}>+ Ajouter</button>
+      </div>
+
+      <ROICalculator team={team} totalLeads={totalLeads} />
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "16px", marginTop: "16px" }}>
+        {[
+          { label: "Leads générés", value: totalLeads, delta: "+40%", icon: "🎯" },
+          { label: "Mandats obtenus", value: totalMandats, delta: "+23%", icon: "📋" },
+        ].map((s, i) => (
+          <div key={i} className="card-white">
+            <div style={{ fontSize: "18px", marginBottom: "4px" }}>{s.icon}</div>
+            <div style={{ fontSize: "11px", color: "var(--muted)", marginBottom: "4px" }}>{s.label}</div>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "28px", fontWeight: "700" }}>{s.value}</div>
+            <div style={{ fontSize: "11px", color: "var(--gold)", marginTop: "3px" }}>{s.delta} ce mois</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginBottom: "16px" }}>
+        <input className="input" placeholder="Rechercher un agent ou une agence..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ marginBottom: "10px" }} />
+        <div style={{ display: "flex", gap: "8px" }}>
+          {["all", "active", "inactive"].map(f => (
+            <button key={f} onClick={() => setFilterActive(f)} style={{
+              padding: "6px 12px",
+              background: filterActive === f ? "var(--gold)" : "transparent",
+              color: filterActive === f ? "var(--dark)" : "var(--muted)",
+              border: `1px solid ${filterActive === f ? "var(--gold)" : "var(--border)"}`,
+              borderRadius: "20px", fontSize: "11px", fontWeight: "600", cursor: "pointer", textTransform: "uppercase"
+            }}>
+              {f === "all" ? "Tous" : f === "active" ? "Actifs" : "Inactifs"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} className="card-white" style={{ marginBottom: "16px", animation: "slideUp 0.3s ease" }}>
+          <div style={{ fontFamily: "var(--serif)", fontSize: "20px", fontWeight: "700", marginBottom: "16px" }}>Nouvel agent</div>
+          {[
+            ["name",   "Nom complet",  "Sophie Martin"],
+            ["title",  "Titre",        "Conseillère Immobilier"],
+            ["agence", "Agence",       "Bordeaux Centre"],
+            ["email",  "Email",        "sophie@reseau.fr"],
+            ["phone",  "Téléphone",    "+33 6 00 00 00 00"],
+            ["photo",  "Photo (URL)",  "https://..."],
+          ].map(([key, label, placeholder]) => (
+            <div key={key} style={{ marginBottom: "14px" }}>
+              <label style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "1px", display: "block", marginBottom: "6px", color: "var(--muted)" }}>{label.toUpperCase()}</label>
+              <input className="input" type={key === "email" ? "email" : "text"} placeholder={placeholder} value={newMember[key]} onChange={e => setNewMember(prev => ({ ...prev, [key]: e.target.value }))} required={key === "name"} />
+            </div>
+          ))}
+          <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
+            <button type="submit" className="btn-dark" style={{ flex: 1, fontSize: "14px", padding: "14px 10px" }}>Créer & commander la carte</button>
+            <button type="button" className="btn-outline" style={{ padding: "14px 16px", fontSize: "14px" }} onClick={() => setShowForm(false)}>Annuler</button>
+          </div>
+        </form>
+      )}
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {filteredTeam.length === 0 ? (
+          <div className="card-white" style={{ textAlign: "center", padding: "40px 20px" }}>
+            <div style={{ fontSize: "40px", marginBottom: "12px" }}>🔍</div>
+            <div style={{ fontSize: "15px", fontWeight: "500", marginBottom: "6px" }}>Aucun agent trouvé</div>
+            <div style={{ fontSize: "13px", color: "var(--muted)" }}>Modifiez votre recherche</div>
+          </div>
+        ) : (
+          filteredTeam.map(member => (
+            <MemberCard key={member.id} member={member} companyColor={companyColor} onToggle={onToggle} onSelect={onSelect} onDelete={onDelete} />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// ONGLET AGENCES
+// ============================================================
+
+function AgencesTab() {
+  const totalLeads   = AGENCES.reduce((a, ag) => a + ag.leads, 0);
+  const totalMandats = AGENCES.reduce((a, ag) => a + ag.mandats, 0);
+  const maxLeads = Math.max(...AGENCES.map(a => a.leads));
+
+  const exportMandats = () => {
+    alert("Export du tableau des mandats simulé (fichier CSV généré)");
+  };
+
+  return (
+    <div>
+      <h2 style={{ fontFamily: "var(--serif)", fontSize: "24px", fontWeight: "700", marginBottom: "4px" }}>Mes agences</h2>
+      <p style={{ fontSize: "12px", color: "var(--muted)", marginBottom: "20px" }}>{AGENCES.length} agences · Nouvelle-Aquitaine</p>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "20px" }}>
+        {[
+          { label: "Leads réseau / mois", value: totalLeads,   icon: "🎯" },
+          { label: "Mandats / mois",      value: totalMandats, icon: "📋" },
+        ].map((s, i) => (
+          <div key={i} className="card-white">
+            <div style={{ fontSize: "18px", marginBottom: "4px" }}>{s.icon}</div>
+            <div style={{ fontSize: "11px", color: "var(--muted)", marginBottom: "4px" }}>{s.label}</div>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "28px", fontWeight: "700" }}>{s.value}</div>
+            <div style={{ fontSize: "11px", color: "var(--gold)", marginTop: "3px" }}>Ce mois</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginBottom: "16px", display: "flex", justifyContent: "flex-end" }}>
+        <button onClick={exportMandats} className="btn-outline" style={{ padding: "10px 16px", fontSize: "12px", minHeight: "40px" }}>
+          📊 Exporter les mandats
+        </button>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {AGENCES.map((ag, i) => (
+          <div key={i} className="card-white">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+              <div>
+                <div style={{ fontSize: "15px", fontWeight: "600" }}>{ag.name}</div>
+                <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>{ag.actifs} agents actifs / {ag.agents}</div>
+              </div>
+              <span className="badge" style={{
+                background: ag.actifs === ag.agents ? "rgba(22,163,74,0.1)" : "rgba(200,169,110,0.1)",
+                color: ag.actifs === ag.agents ? "#16a34a" : "var(--gold)"
+              }}>
+                {Math.round((ag.actifs / ag.agents) * 100)}% actifs
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+              <div>
+                <div style={{ fontSize: "11px", color: "var(--muted)", marginBottom: "3px" }}>Leads / mois</div>
+                <div style={{ fontFamily: "var(--serif)", fontSize: "22px", fontWeight: "700", color: "var(--gold)" }}>{ag.leads}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: "11px", color: "var(--muted)", marginBottom: "3px" }}>Mandats</div>
+                <div style={{ fontFamily: "var(--serif)", fontSize: "22px", fontWeight: "700" }}>{ag.mandats}</div>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ height: "4px", background: "rgba(15,15,15,0.08)", borderRadius: "2px" }}>
+                  <div style={{ height: "4px", width: `${(ag.leads / maxLeads) * 100}%`, background: "var(--gold)", borderRadius: "2px", transition: "width 0.4s" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// ONGLET NFC
+// ============================================================
+
+function NFCTab() {
+  return (
+    <div>
+      <h2 style={{ fontFamily: "var(--serif)", fontSize: "24px", fontWeight: "700", marginBottom: "6px" }}>Cartes NFC</h2>
+      <p style={{ fontSize: "13px", color: "var(--muted)", marginBottom: "20px" }}>Commandez les cartes physiques de vos agents.</p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
+        {NFC_CARDS.map((card, i) => (
+          <div key={i} style={{ background: card.highlight ? "var(--dark)" : "#fff", border: card.highlight ? "2px solid var(--gold)" : "1px solid var(--border)", borderRadius: "12px", padding: "18px", color: card.highlight ? "#fff" : "var(--dark)", display: "flex", alignItems: "center", gap: "14px" }}>
+            <div style={{ fontSize: "28px" }}>{card.icon}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "15px", fontWeight: "600", marginBottom: "2px" }}>{card.type}</div>
+              <div style={{ fontSize: "12px", opacity: "0.5" }}>{card.desc} · min. {card.min}</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontFamily: "var(--serif)", fontSize: "20px", fontWeight: "700", color: card.highlight ? "var(--gold)" : "var(--dark)" }}>{card.price}</div>
+              <button style={{ marginTop: "6px", padding: "6px 14px", background: card.highlight ? "var(--gold)" : "var(--dark)", color: card.highlight ? "var(--dark)" : "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontFamily: "var(--sans)", fontSize: "12px", fontWeight: "600" }}>Commander</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="card-white">
+        <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "1.5px", color: "var(--muted)", marginBottom: "14px" }}>COMMANDES EN COURS</div>
+        {[
+          { ref: "#CMD-2841", type: "Premium Metal × 20 agents", status: "En production", date: "Livraison 28 fév." },
+          { ref: "#CMD-2756", type: "Standard × 5 agents",       status: "Livré",          date: "15 jan. 2025" },
+        ].map((o, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: i === 0 ? "1px solid var(--border)" : "none" }}>
+            <div>
+              <div style={{ fontSize: "13px", fontWeight: "500" }}>{o.ref}</div>
+              <div style={{ fontSize: "12px", color: "var(--muted)", marginTop: "2px" }}>{o.type} · {o.date}</div>
+            </div>
+            <span className="badge" style={{ background: o.status === "Livré" ? "rgba(22,163,74,0.1)" : "rgba(200,169,110,0.12)", color: o.status === "Livré" ? "#16a34a" : "var(--gold)", whiteSpace: "nowrap" }}>{o.status}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// ONGLET PARAMÈTRES
+// ============================================================
+
+function SettingsTab({ company, setView }) {
+  return (
+    <div>
+      <h2 style={{ fontFamily: "var(--serif)", fontSize: "24px", fontWeight: "700", marginBottom: "20px" }}>Paramètres</h2>
+
+      <div style={{ background: "var(--dark)", borderRadius: "12px", padding: "20px", marginBottom: "16px", color: "#fff" }}>
+        <div style={{ fontSize: "11px", color: "var(--gold)", fontWeight: "600", letterSpacing: "1px", marginBottom: "6px" }}>PLAN ACTUEL</div>
+        <div style={{ fontFamily: "var(--serif)", fontSize: "28px", fontWeight: "700", marginBottom: "4px" }}>{company.plan}</div>
+        <div style={{ fontSize: "14px", color: "var(--gold)", marginBottom: "6px" }}>{company.used} / {company.seats} agents · {company.agences} agences</div>
+        <div style={{ height: "4px", background: "rgba(255,255,255,0.1)", borderRadius: "2px", marginBottom: "16px" }}>
+          <div style={{ height: "4px", width: `${(company.used / company.seats) * 100}%`, background: "var(--gold)", borderRadius: "2px" }} />
+        </div>
+        <button className="btn-gold" style={{ width: "100%", fontSize: "14px" }} onClick={() => setView("pricing")}>Gérer l'abonnement</button>
+      </div>
+
+      <div className="card-white" style={{ marginBottom: "16px" }}>
+        <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "1.5px", color: "var(--muted)", marginBottom: "16px" }}>BRANDING RÉSEAU</div>
+        {[
+          ["Nom du réseau",       company.name],
+          ["Région",              company.region],
+          ["Domaine personnalisé","proprio-sudouest.socialsticks.io"],
+        ].map(([l, v]) => (
+          <div key={l} style={{ marginBottom: "14px" }}>
+            <label style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "1px", display: "block", marginBottom: "6px", color: "var(--muted)" }}>{l.toUpperCase()}</label>
+            <input className="input" defaultValue={v} />
+          </div>
+        ))}
+        <div style={{ marginBottom: "16px" }}>
+          <label style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "1px", display: "block", marginBottom: "8px", color: "var(--muted)" }}>COULEUR RÉSEAU</label>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: company.color, border: "1px solid var(--border)", flexShrink: 0 }} />
+            <input className="input" defaultValue={company.color} style={{ fontFamily: "monospace" }} />
+          </div>
+        </div>
+        <button className="btn-gold" style={{ width: "100%", fontSize: "14px" }}>Sauvegarder le branding</button>
+      </div>
+
+      <div className="card-white" style={{ marginBottom: "16px" }}>
+        <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "1.5px", color: "var(--muted)", marginBottom: "16px" }}>INTÉGRATIONS CRM</div>
+        {[
+          ["Apimo",      "Connecté ✓"],
+          ["Perizia",    "Non connecté"],
+          ["Salesforce", "Non connecté"],
+        ].map(([crm, status]) => (
+          <div key={crm} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+            <span style={{ fontSize: "14px", fontWeight: "500" }}>{crm}</span>
+            <span style={{ fontSize: "12px", color: status.includes("✓") ? "#16a34a" : "var(--muted)" }}>{status}</span>
+          </div>
+        ))}
+        <button className="btn-outline" style={{ width: "100%", fontSize: "13px", marginTop: "8px" }}>Gérer les intégrations</button>
+      </div>
+
+      <div className="card-white">
+        <div style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "1.5px", color: "var(--muted)", marginBottom: "16px" }}>COMPTE ADMINISTRATEUR</div>
+        {[["Nom complet", "Jean Dupont"], ["Email", "j.dupont@proprio-sudouest.fr"]].map(([l, v]) => (
+          <div key={l} style={{ marginBottom: "14px" }}>
+            <label style={{ fontSize: "11px", fontWeight: "600", letterSpacing: "1px", display: "block", marginBottom: "6px", color: "var(--muted)" }}>{l.toUpperCase()}</label>
+            <input className="input" defaultValue={v} />
+          </div>
+        ))}
+        <button className="btn-outline" style={{ width: "100%", fontSize: "14px" }}>Changer le mot de passe</button>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// PROFIL PUBLIC AGENT IMMOBILIER
+// ============================================================
+
+function PublicProfile({ member, company, setView, onScan, onDPEUpdate }) {
+  const [scanned, setScanned] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const [properties, setProperties] = useState(PROPERTIES);
+  const [dpeFlash, setDPEFlash] = useState(false);
+
+  const handleNFC = () => {
+    setScanned(true);
+    onScan(member.id);
+    setTimeout(() => setScanned(false), 2000);
+  };
+
+  const simulateDPEUpdate = () => {
+    const newProperties = [...properties];
+    const randomIndex = Math.floor(Math.random() * properties.length);
+    const dpes = ["A", "B", "C", "D", "E", "F", "G"];
+    const newDPE = dpes[Math.floor(Math.random() * dpes.length)];
+    newProperties[randomIndex] = { ...newProperties[randomIndex], dpe: newDPE };
+    setProperties(newProperties);
+    setDPEFlash(true);
+    setTimeout(() => setDPEFlash(false), 1000);
+  };
+
+  return (
+    <div style={{
+      fontFamily: "var(--sans)", minHeight: "100vh",
+      background: "linear-gradient(160deg, #0F0F0F 0%, #1a1508 100%)",
+      display: "flex", flexDirection: "column", alignItems: "center",
+      justifyContent: "center", padding: "40px 20px"
+    }}>
+      <style>{GLOBAL_STYLES}</style>
+
+      <button onClick={() => setView("manager")} style={{
+        position: "fixed", top: "16px", left: "16px",
+        background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)",
+        color: "#fff", padding: "10px 16px", borderRadius: "8px",
+        cursor: "pointer", fontSize: "14px", fontFamily: "var(--sans)", zIndex: 10
+      }}>← Retour</button>
+
+      <div style={{ position: "fixed", top: "16px", right: "16px", zIndex: 10, display: "flex", gap: "10px" }}>
+        <button onClick={simulateDPEUpdate} style={{
+          background: "rgba(200,169,110,0.2)",
+          color: "var(--gold)",
+          border: "1px solid rgba(200,169,110,0.3)",
+          borderRadius: "30px", padding: "12px 20px",
+          fontSize: "14px", fontWeight: "600", cursor: "pointer"
+        }}>
+          🔄 Simuler mise à jour DPE
+        </button>
+        <button onClick={handleNFC} className={scanned ? "scan-animation" : ""} style={{
+          background: scanned ? "#4CAF50" : "var(--gold)",
+          color: scanned ? "#fff" : "var(--dark)",
+          border: "none", borderRadius: "30px", padding: "12px 20px",
+          fontSize: "14px", fontWeight: "600", cursor: "pointer",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.3)", transition: "all 0.3s"
+        }}>
+          {scanned ? "✓ Lead enregistré !" : "📱 Simuler un tap NFC"}
+        </button>
+      </div>
+
+      <div style={{ maxWidth: "380px", width: "100%", textAlign: "center" }}>
+
+        <div className="fu fu1" style={{ marginBottom: "24px" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.08)", padding: "8px 16px", borderRadius: "100px", border: "1px solid rgba(255,255,255,0.12)" }}>
+            <div style={{ width: "20px", height: "20px", borderRadius: "4px", background: company.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "8px", fontWeight: "800", color: "#0A0A0A" }}>{company.logo}</div>
+            <span style={{ color: "#fff", fontSize: "13px", opacity: "0.85" }}>{company.name}</span>
+          </div>
+        </div>
+
+        <div className="fu fu1" style={{ display: "flex", justifyContent: "center" }}>
+          <Avatar text={member.avatar} color={company.color} size={88} photo={member.photo} />
+        </div>
+        <h1 className="fu fu2" style={{ fontFamily: "var(--serif)", fontSize: "28px", fontWeight: "700", color: "#fff", marginTop: "14px", marginBottom: "4px" }}>{member.name}</h1>
+        <p className="fu fu2" style={{ fontSize: "13px", color: company.color, letterSpacing: "1px", marginBottom: "2px" }}>{member.title}</p>
+        <p className="fu fu2" style={{ fontSize: "12px", color: "rgba(255,255,255,0.3)", marginBottom: "10px" }}>{member.agence} · {company.name}</p>
+
+        <div className="fu fu2" style={{ display: "inline-flex", gap: "20px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "10px 20px", marginBottom: "28px" }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginBottom: "2px" }}>Leads</div>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "20px", fontWeight: "700", color: company.color }}>{member.leads}</div>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginBottom: "2px" }}>Mandats</div>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "20px", fontWeight: "700", color: "#fff" }}>{member.mandats}</div>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.4)", marginBottom: "2px" }}>Taps NFC</div>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "20px", fontWeight: "700", color: "#fff" }}>{member.taps}</div>
+          </div>
+        </div>
+
+        <div className="fu fu3" style={{ marginBottom: "16px" }}>
+          <button onClick={() => setShowQR(!showQR)} style={{ background: "rgba(255,255,255,0.07)", color: "#fff", border: "1px solid rgba(255,255,255,0.12)", padding: "10px 20px", borderRadius: "30px", fontSize: "13px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "8px" }}>
+            {showQR ? "📱 Masquer le QR Code" : "🔳 Afficher le QR Code"}
+          </button>
+        </div>
+        {showQR && (
+          <div style={{ marginBottom: "20px", background: "#fff", padding: "16px", borderRadius: "12px", display: "inline-block" }}>
+            <div style={{ width: "160px", height: "160px", background: "linear-gradient(45deg, #000 25%, transparent 25%), linear-gradient(-45deg, #000 25%, transparent 25%)", backgroundSize: "16px 16px", backgroundPosition: "0 0, 0 8px" }} />
+            <p style={{ fontSize: "11px", color: "var(--muted)", marginTop: "8px" }}>Scanner pour accéder au profil</p>
+          </div>
+        )}
+
+        <div className="fu fu3" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {[
+            { icon: "📞", label: "Appeler",                  href: `tel:${member.phone}`, primary: true },
+            { icon: "✉️", label: "Envoyer un email",         href: `mailto:${member.email}` },
+            { icon: "📅", label: "Prendre rendez-vous",      href: "#" },
+            { icon: "📋", label: "Demander une estimation",  href: "#" },
+            { icon: "💼", label: "LinkedIn",                 href: "#" },
+          ].map((link, i) => (
+            <a key={i} href={link.href} className="pub-link" style={{
+              background: link.primary ? company.color : "rgba(255,255,255,0.07)",
+              color: link.primary ? "#0A0A0A" : "#fff",
+              border: link.primary ? "none" : "1px solid rgba(255,255,255,0.12)",
+              fontWeight: link.primary ? "600" : "400"
+            }}>
+              <span style={{ fontSize: "20px" }}>{link.icon}</span>
+              <span>{link.label}</span>
+            </a>
+          ))}
+        </div>
+
+        <div style={{ marginTop: "32px", textAlign: "left" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+            <h3 style={{ fontFamily: "var(--serif)", fontSize: "18px", color: "#fff" }}>Biens en exclusivité</h3>
+            {dpeFlash && <span className="badge dpe-flash" style={{ background: "var(--gold)", color: "var(--dark)" }}>DPE mis à jour !</span>}
+          </div>
+          {properties.slice(0, 4).map((p, i) => (
+            <div key={i} className={dpeFlash ? "dpe-flash" : ""} style={{ background: "rgba(255,255,255,0.05)", borderRadius: "10px", padding: "14px", marginBottom: "10px" }}>
+              {p.image && (
+                <img src={p.image} alt={p.type} style={{ width: "100%", height: "120px", objectFit: "cover", borderRadius: "8px", marginBottom: "10px" }} />
+              )}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px" }}>
+                <div style={{ fontSize: "14px", fontWeight: "600", color: "#fff" }}>{p.type}</div>
+                <DPEBadge dpe={p.dpe} />
+              </div>
+              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.4)", marginBottom: "8px" }}>{p.lieu}</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ fontFamily: "var(--serif)", fontSize: "16px", fontWeight: "700", color: company.color }}>{p.price}</div>
+                <StatutBadge statut={p.statut} />
+              </div>
+            </div>
+          ))}
+          <button style={{ width: "100%", padding: "12px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "8px", color: "#fff", fontSize: "13px", cursor: "pointer", fontFamily: "var(--sans)" }}>
+            Voir tous mes biens →
+          </button>
+        </div>
+
+        <div style={{ marginTop: "24px", background: "rgba(200,169,110,0.08)", border: "1px solid rgba(200,169,110,0.2)", borderRadius: "12px", padding: "20px", textAlign: "left" }}>
+          <div style={{ fontFamily: "var(--serif)", fontSize: "18px", color: "#fff", marginBottom: "14px" }}>Être rappelé</div>
+          <input className="input" placeholder="Votre nom" style={{ marginBottom: "10px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }} />
+          <input className="input" placeholder="Votre téléphone" style={{ marginBottom: "10px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }} />
+          <select className="input" style={{ marginBottom: "12px", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}>
+            <option value="">Votre projet</option>
+            <option value="achat">Achat</option>
+            <option value="vente">Vente / Estimation</option>
+            <option value="location">Location</option>
+            <option value="investissement">Investissement</option>
+          </select>
+          <button className="btn-gold" style={{ width: "100%", fontSize: "14px" }}>Envoyer ma demande</button>
+        </div>
+
+        <div style={{ marginTop: "36px", fontSize: "10px", color: "rgba(255,255,255,0.15)", letterSpacing: "3px" }}>POWERED BY SOCIALSTICKS</div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// APPLICATION PRINCIPALE
+// ============================================================
+
+export default function Socialsticks() {
+  const [view, setView] = useState("landing");
+  const [tab, setTab] = useState("team");
+  const [team, setTeam] = useState(DEMO_TEAM);
+  const [selectedMember, setSelectedMember] = useState(DEMO_TEAM[0]);
+
+  useEffect(() => {
+    try { const s = localStorage.getItem("ss-immo"); if (s) setTeam(JSON.parse(s)); } catch (e) {}
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("ss-immo", JSON.stringify(team)); } catch (e) {}
+  }, [team]);
+
+  const toggleMember  = id => setTeam(p => p.map(m => m.id === id ? { ...m, active: !m.active } : m));
+  const addMember     = nm => setTeam(p => [...p, { 
+    id: Date.now(), 
+    ...nm,
+    avatar: nm.name.slice(0,2).toUpperCase(),
+    photo: nm.photo || null,
+    active: true, 
+    views: 0, 
+    taps: 0, 
+    leads: 0, 
+    mandats: 0 
+  }]);
+  const updateMember  = (id, u) => setTeam(p => p.map(m => m.id === id ? { ...m, ...u } : m));
+  const deleteMember  = id => { if (window.confirm("Retirer cet agent ?")) setTeam(p => p.filter(m => m.id !== id)); };
+  const activeCount   = team.filter(m => m.active).length;
+
+  if (view === "landing") return (
+    <div style={{ fontFamily: "var(--sans)", background: "var(--cream)", minHeight: "100vh", color: "var(--dark)", overflowX: "hidden" }}>
+      <style>{GLOBAL_STYLES}</style>
+      <Navbar setView={setView} />
+      <Hero setView={setView} />
+      <Stats />
+      <HowItWorks />
+      <UseCases />
+      <DPESection />
+      <ROISection />
+      <CTASection setView={setView} />
+      <Footer />
+    </div>
+  );
+
+  if (view === "pricing") return (
+    <div style={{ fontFamily: "var(--sans)", background: "var(--cream)", minHeight: "100vh", color: "var(--dark)" }}>
+      <style>{GLOBAL_STYLES}</style>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "16px 20px", borderBottom: "1px solid var(--border)", background: "#fff", position: "sticky", top: 0, zIndex: 100 }}>
+        <button onClick={() => setView("landing")} style={{ background: "none", border: "none", fontSize: "22px", cursor: "pointer", padding: "4px", lineHeight: 1 }}>←</button>
+        <div style={{ fontFamily: "var(--serif)", fontSize: "19px", fontWeight: "700" }}>Social<span style={{ color: "var(--gold)" }}>sticks</span></div>
+      </div>
+      <div style={{ padding: "32px 20px 48px" }}>
+        <div className="tag" style={{ marginBottom: "10px" }}>Offres immobilier</div>
+        <h1 style={{ fontFamily: "var(--serif)", fontSize: "34px", fontWeight: "700", marginBottom: "8px", lineHeight: "1.15" }}>Pour chaque taille de réseau.</h1>
+        <p style={{ color: "var(--muted)", fontSize: "15px", marginBottom: "10px" }}>Cartes NFC incluses. Programme pilote gratuit 3 mois.</p>
+        <div style={{ background: "rgba(200,169,110,0.08)", border: "1px solid rgba(200,169,110,0.25)", borderRadius: "10px", padding: "14px 16px", marginBottom: "28px" }}>
+          <p style={{ fontSize: "13px", lineHeight: "1.65" }}>
+            💡 À 45€/mois/agent, <strong>1 mandat supplémentaire couvre 2 ans d'abonnement</strong>. ROI moyen constaté : ×4,2 en 6 mois.
+          </p>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          {PLANS.map((plan, i) => <PricingCard key={i} plan={plan} setView={setView} />)}
+        </div>
+        <PricingFAQ />
+      </div>
+    </div>
+  );
+
+  if (view === "publicProfile") return (
+    <PublicProfile
+      member={selectedMember}
+      company={DEMO_COMPANY}
+      setView={setView}
+      onScan={id => updateMember(id, { taps: selectedMember.taps + 1, leads: selectedMember.leads + 1 })}
+      onDPEUpdate={() => {}}
+    />
+  );
+
+  return (
+    <div style={{ fontFamily: "var(--sans)", background: "#F4F3F0", minHeight: "100vh", color: "var(--dark)", paddingBottom: "80px" }}>
+      <style>{GLOBAL_STYLES}</style>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 20px", height: "56px", background: "#fff", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ width: "28px", height: "28px", borderRadius: "6px", background: DEMO_COMPANY.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", fontWeight: "800", color: "#0A0A0A" }}>{DEMO_COMPANY.logo}</div>
+          <div>
+            <div style={{ fontSize: "13px", fontWeight: "600", lineHeight: 1 }}>{DEMO_COMPANY.name}</div>
+            <div style={{ fontSize: "10px", color: "var(--gold)" }}>{DEMO_COMPANY.plan} · {DEMO_COMPANY.agences} agences</div>
+          </div>
+        </div>
+        <button onClick={() => setView("landing")} style={{ background: "none", border: "none", fontSize: "13px", color: "var(--muted)", cursor: "pointer", padding: "8px" }}>Quitter</button>
+      </div>
+
+      <div style={{ padding: "20px" }}>
+        {tab === "team"     && <TeamTab team={team} activeCount={activeCount} companyColor={DEMO_COMPANY.color} onToggle={toggleMember} onAdd={addMember} onSelect={m => { setSelectedMember(m); setView("publicProfile"); }} onDelete={deleteMember} />}
+        {tab === "agences"  && <AgencesTab />}
+        {tab === "nfc"      && <NFCTab />}
+        {tab === "settings" && <SettingsTab company={DEMO_COMPANY} setView={setView} />}
+      </div>
+
+      <BottomNav tab={tab} setTab={setTab} />
+    </div>
+  );
+}
